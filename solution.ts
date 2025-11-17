@@ -75,7 +75,7 @@ const printBookDetails = (book: Book) => {
 
 
 const getUniqueValues = (items1: number[], items2: number[]) => {
-      let result: number[] = []; let nIndex= 0;
+      let result = []; let nIndex= 0;
       for(let i=0; i<items1.length; i++) {
             result[nIndex] = items1[i];   
             nIndex++;

@@ -1,17 +1,138 @@
-Problem 1:
-Create a function formatValue that accepts a value which may be a string, number, or boolean, and returns the following based on the value type:
+# TypeScript-এ keyof এর ব্যবহার
 
-If the input is a string → return the string in uppercase
-If the input is a number → return the number multiplied by 10
-If the input is a boolean → return the opposite value (true → false, false → true)
-Requirements:
-You must write the correct type for the function parameter and the return type.
-You must use type checking to handle each case.
-Sample Input:
-console.log(formatValue('hello'));
-console.log(formatValue(5));
-console.log(formatValue(true));
-Sample Output:
-HELLO;
-50;
-false;
+## ১. **keyof এর ব্যবহার**
+`keyof` হলো TypeScript এর একটি বিশেষ অপারেটর যা কোনো অবজেক্ট টাইপের সব প্রপার্টির নাম একটি ইউনিয়ন টাইপ হিসেবে রিটার্ন করে। এটি টাইপ-সেফ কোড লেখার জন্য অত্যন্ত কার্যকর।
+
+### **কেন keyof ব্যবহার করবেন?**
+- অবজেক্টের প্রপার্টি এক্সেস করার সময় টাইপ সেফটি নিশ্চিত করতে
+- ডাইনামিক প্রপার্টি এক্সেসের জন্য
+- জেনেরিক ফাংশন তৈরি করতে
+
+### **উদাহরণ:**
+```ts
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+}
+
+type UserKeys = keyof User; // "id" | "name" | "email" | "age"
+
+function getUserProperty(user: User, key: keyof User) {
+  return user[key];
+}
+
+const user: User = {
+  id: 1,
+  name: "Rahim",
+  email: "rahim@example.com",
+  age: 25,
+};
+
+console.log(getUserProperty(user, "name"));
+console.log(getUserProperty(user, "email"));
+// console.log(getUserProperty(user, "address")); // ❌ এরর
+```
+
+### **আরও উদাহরণ:**
+```ts
+function updateUser<K extends keyof User>(
+  user: User,
+  key: K,
+  value: User[K]
+): User {
+  return { ...user, [key]: value };
+}
+
+const updatedUser = updateUser(user, "age", 26); // ✅
+// const wrongUpdate = updateUser(user, "age", "26"); // ❌
+```
+
+---
+
+## ২. **any, unknown, এবং never টাইপের পার্থক্য**
+
+### **any টাইপ**
+`any` TypeScript এর টাইপ চেকিং বন্ধ করে দেয়। এটি যেকোনো মান গ্রহণ করতে পারে এবং যেকোনো অপারেশন করা যায়।
+
+```ts
+let value: any = 10;
+value = "Karim";
+value = true;
+value = { name: "Karim" };
+
+value.toUpperCase(); // সম্ভাব্য রানটাইম এরর
+```
+
+### **unknown টাইপ**
+`unknown` হলো `any` এর টাইপ-সেফ বিকল্প। ব্যবহার করার আগে টাইপ চেক করতে হয়।
+
+```ts
+let value: unknown = 10;
+value = "hello";
+
+if (typeof value === "string") {
+  console.log(value.toUpperCase());
+}
+```
+
+### **never টাইপ**
+`never` নির্দেশ করে যে কোনো মান কখনো রিটার্ন হবে না। সাধারণত এরর থ্রো করা বা ইনফিনিট লুপে ব্যবহৃত হয়।
+
+```ts
+function throwError(message: string): never {
+  throw new Error(message);
+}
+
+function infiniteLoop(): never {
+  while (true) {}
+}
+```
+
+### **exhaustive check উদাহরণ**
+```ts
+type Shape = "circle" | "square" | "triangle";
+
+function getArea(shape: Shape): number {
+  switch (shape) {
+    case "circle":
+      return 3.14 * 10 * 10;
+    case "square":
+      return 100;
+    case "triangle":
+      return 50;
+    default:
+      const exhaustiveCheck: never = shape;
+      throw new Error(`Unknown shape: ${exhaustiveCheck}`);
+  }
+}
+```
+
+---
+
+## 📌 **তুলনামূলক সারণি**
+
+| বৈশিষ্ট্য | any | unknown | never |
+|----------|-----|---------|--------|
+| যেকোনো মান গ্রহণ করে | ✅ | ✅ | ❌ |
+| টাইপ চেক বাধ্যতামূলক | ❌ | ✅ | N/A |
+| নিরাপদ | ❌ | ✅ | ✅ |
+| রিটার্ন টাইপ হিসেবে | ✅ | ✅ | ❌ (যখন কিছু রিটার্ন হয় না) |
+
+---
+
+## 🎯 **কখন কোনটি ব্যবহার করবেন?**
+- **any** → যতটা সম্ভব এড়িয়ে চলুন; লিগেসি কোডে সীমিত ব্যবহার।
+- **unknown** → যখন টাইপ জানা নেই কিন্তু নিরাপদ কোড দরকার (API response, user input)।
+- **never** → exhaustive check, error handling, এবং অসম্ভব অবস্থা নির্দেশ করতে।
+
+---
+
+## ✅ **সারসংক্ষেপ**
+TypeScript এর এই ফিচারগুলো সঠিকভাবে ব্যবহার করলে কোড হবে:
+- আরও নিরাপদ
+- বাগ-মুক্ত
+- maintainable এবং scalable
+
+Happy Coding! 🚀
